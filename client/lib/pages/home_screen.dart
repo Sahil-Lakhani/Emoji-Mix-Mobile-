@@ -15,6 +15,22 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
   String? _imageUrl;
   String? _selectedEmoji;
 
+  // Define a FocusNode instance
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // Dispose the FocusNode when it's no longer needed
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   Future<void> _getPossibleEmojisForCombination() async {
     final url = Uri.parse(
         'http://192.168.0.153:3000/api/getPossibleEmojisForCombination');
@@ -92,86 +108,101 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Emoji Search'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _emojiController,
-              style: const TextStyle(fontSize: 22),
-              decoration: const InputDecoration(
-                labelText: 'Enter Emoji',
-              ),
-            ),
-            const SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: _getPossibleEmojisForCombination,
-              child: const Text('Search', style: TextStyle(fontSize: 18)),
-            ),
-            const SizedBox(height: 20.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Left Emoji: ${_emojiController.text}',
-                    style: const TextStyle(fontSize: 22)),
-                const SizedBox(width: 20),
-                Text('Right Emoji: ${_selectedEmoji ?? "Not selected"}',
-                    style: const TextStyle(fontSize: 22)),
-              ],
-            ),
-            const SizedBox(height: 20.0),
-            ElevatedButton(
-              //call the findValidEmojiCombo function here
-              onPressed: _findValidEmojiCombo,
-              child: const Text(
-                'Generate',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            const SizedBox(height: 20.0),
-            if (_imageUrl != null)
-              Image.network(
-                _imageUrl!,
-                height: 40,
-                width: 30,
-              ),
-            const SizedBox(height: 20.0),
-            Text(
-              'Available Emojis for Combinations: ${_emojis.length}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20.0),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 6,
-                  crossAxisSpacing: 5.0,
-                  mainAxisSpacing: 5.0,
+    return GestureDetector(
+      // Wrap the entire Scaffold body with GestureDetector
+      onTap: () {
+        // Call unfocus() method of FocusNode to hide the keyboard
+        _focusNode.unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Emoji Search'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _emojiController,
+                style: const TextStyle(fontSize: 22),
+                decoration: const InputDecoration(
+                  labelText: 'Enter Emoji',
                 ),
-                itemCount: _emojis.length,
-                itemBuilder: (context, index) {
-                  return GridTile(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedEmoji = _emojis[index];
-                        });
-                        printSelectedEmoji(_emojis[index]);
-                      },
-                      child: Center(
-                        child: Text(_emojis[index]),
-                      ),
-                    ),
-                  );
-                },
+                focusNode: _focusNode, // Assign the FocusNode to TextField
               ),
-            ),
-          ],
+              const SizedBox(height: 20.0),
+              ElevatedButton(
+                  onPressed: () {
+                  _focusNode.unfocus();
+                  // Call your function here if needed
+                  _getPossibleEmojisForCombination();
+                },
+                child: const Text('Search', style: TextStyle(fontSize: 18)),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Left Emoji: ${_emojiController.text}',
+                      style: const TextStyle(fontSize: 22)),
+                  const SizedBox(width: 20),
+                  Text('Right Emoji: ${_selectedEmoji ?? " "}',
+                      style: const TextStyle(fontSize: 22)),
+                ],
+              ),
+              const SizedBox(height: 20.0),
+              ElevatedButton(
+                //call the findValidEmojiCombo function here
+                  onPressed: () {
+                  _focusNode.unfocus();
+                  // Call your function here if needed
+                  _findValidEmojiCombo();
+                },
+                child: const Text(
+                  'Generate',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              const SizedBox(height: 20.0),
+              if (_imageUrl != null)
+                Image.network(
+                  _imageUrl!,
+                  height: 200,
+                ),
+              const SizedBox(height: 20.0),
+              Text(
+                'Available Emojis for Combinations: ${_emojis.length}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20.0),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 6,
+                    crossAxisSpacing: 5.0,
+                    mainAxisSpacing: 5.0,
+                  ),
+                  itemCount: _emojis.length,
+                  itemBuilder: (context, index) {
+                    return GridTile(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedEmoji = _emojis[index];
+                          });
+                          printSelectedEmoji(_emojis[index]);
+                        },
+                        child: Center(
+                          child: Text(_emojis[index]),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
