@@ -6,13 +6,13 @@ class EmojiSearchScreen extends StatefulWidget {
   const EmojiSearchScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _EmojiSearchScreenState createState() => _EmojiSearchScreenState();
 }
 
 class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
   final TextEditingController _emojiController = TextEditingController();
   List<String> _emojis = [];
+  String? _imageUrl;
   String? _selectedEmoji;
 
   Future<void> _getPossibleEmojisForCombination() async {
@@ -26,12 +26,12 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
       );
 
       if (response.statusCode == 200) {
+        print(response.statusCode);
         setState(() {
           _emojis =
               List<String>.from(jsonDecode(response.body)['possibleEmojis']);
         });
         print(_emojis);
-        print(_emojis.length);
       } else {
         setState(() {
           _emojis = [];
@@ -46,35 +46,47 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
     }
   }
 
-  Future<void> _findValidEmojiCombo(String leftEmoji, String rightEmoji) async {
-    final url = Uri.parse('http://192.168.0.153:3000/api/findValidEmojiCombo');
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'leftEmoji': leftEmoji,
-          'rightEmoji': rightEmoji,
-        }),
-      );
+  Future<void> _findValidEmojiCombo() async {
+    if (_emojis.isNotEmpty &&
+        _emojiController.text.isNotEmpty &&
+        _selectedEmoji != null) {
+      final leftEmoji = _emojiController.text;
+      final rightEmoji = _selectedEmoji!;
 
-      if (response.statusCode == 200) {
-        // Handle successful response
-        print('Response: ${response.body}');
-      } else {
-        // Handle failed response
+      final url =
+          Uri.parse('http://192.168.0.153:3000/api/findValidEmojiCombo');
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'leftEmoji': leftEmoji,
+            'rightEmoji': rightEmoji,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          print(response.statusCode);
+          print(response.body);
+          setState(() {
+            _imageUrl = jsonDecode(response.body)['imageUrl'];
+          });
+        } else {
+          setState(() {
+            _imageUrl = null;
+          });
+        }
+      } catch (e) {
+        print(e);
       }
-    } catch (e) {
-      // Handle errors
     }
   }
 
   void printSelectedEmoji(String emoji) {
     var leftEmoji = _emojiController.text;
     var rightEmoji = emoji;
-    print(' Selected Emoji: $_selectedEmoji');
-    print('left Emoji: $leftEmoji');
-    print('right Emoji: $rightEmoji');
+    print('leftEmoji: $leftEmoji');
+    print('rightEmoji: $rightEmoji');
   }
 
   @override
@@ -99,7 +111,7 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
                   children: [
                     ElevatedButton(
                       //call the findValidEmojiCombo function here
-                      onPressed: () => {},
+                      onPressed: _findValidEmojiCombo,
                       child: const Text('Generate'),
                     ),
                     const SizedBox(width: 10.0),
