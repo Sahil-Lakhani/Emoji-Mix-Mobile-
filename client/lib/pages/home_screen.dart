@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class EmojiSearchScreen extends StatefulWidget {
@@ -14,6 +13,7 @@ class EmojiSearchScreen extends StatefulWidget {
 class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
   final TextEditingController _emojiController = TextEditingController();
   List<String> _emojis = [];
+  String? _selectedEmoji;
 
   Future<void> _getPossibleEmojisForCombination() async {
     final url = Uri.parse(
@@ -46,8 +46,35 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
     }
   }
 
+  Future<void> _findValidEmojiCombo(String leftEmoji, String rightEmoji) async {
+    final url = Uri.parse('http://192.168.0.153:3000/api/findValidEmojiCombo');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'leftEmoji': leftEmoji,
+          'rightEmoji': rightEmoji,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Handle successful response
+        print('Response: ${response.body}');
+      } else {
+        // Handle failed response
+      }
+    } catch (e) {
+      // Handle errors
+    }
+  }
+
   void printSelectedEmoji(String emoji) {
-    print('Selected Emoji: $emoji');
+    var leftEmoji = _emojiController.text;
+    var rightEmoji = emoji;
+    print(' Selected Emoji: $_selectedEmoji');
+    print('left Emoji: $leftEmoji');
+    print('right Emoji: $rightEmoji');
   }
 
   @override
@@ -66,9 +93,23 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
               decoration: const InputDecoration(labelText: 'Enter Emoji'),
             ),
             const SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: _getPossibleEmojisForCombination,
-              child: const Text('Search'),
+            Row(
+              children: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      //call the findValidEmojiCombo function here
+                      onPressed: () => {},
+                      child: const Text('Generate'),
+                    ),
+                    const SizedBox(width: 10.0),
+                    ElevatedButton(
+                      onPressed: _getPossibleEmojisForCombination,
+                      child: const Text('Search'),
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 20.0),
             Text(
@@ -87,7 +128,12 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
                 itemBuilder: (context, index) {
                   return GridTile(
                     child: GestureDetector(
-                      onTap: () => printSelectedEmoji(_emojis[index]),
+                      onTap: () {
+                        setState(() {
+                          _selectedEmoji = _emojis[index];
+                        });
+                        printSelectedEmoji(_emojis[index]);
+                      },
                       child: Center(
                         child: Text(_emojis[index]),
                       ),
