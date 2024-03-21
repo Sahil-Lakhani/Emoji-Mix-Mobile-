@@ -69,7 +69,8 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
           print(response.statusCode);
           print(response.body);
           setState(() {
-            _imageUrl = jsonDecode(response.body)['imageUrl'];
+            _imageUrl = jsonDecode(response.body);
+            print('Image URL: $_imageUrl');
           });
         } else {
           setState(() {
@@ -102,27 +103,43 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
           children: [
             TextField(
               controller: _emojiController,
-              decoration: const InputDecoration(labelText: 'Enter Emoji'),
+              style: const TextStyle(fontSize: 22),
+              decoration: const InputDecoration(
+                labelText: 'Enter Emoji',
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: _getPossibleEmojisForCombination,
+              child: const Text('Search', style: TextStyle(fontSize: 18)),
             ),
             const SizedBox(height: 20.0),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    ElevatedButton(
-                      //call the findValidEmojiCombo function here
-                      onPressed: _findValidEmojiCombo,
-                      child: const Text('Generate'),
-                    ),
-                    const SizedBox(width: 10.0),
-                    ElevatedButton(
-                      onPressed: _getPossibleEmojisForCombination,
-                      child: const Text('Search'),
-                    ),
-                  ],
-                ),
+                Text('Left Emoji: ${_emojiController.text}',
+                    style: const TextStyle(fontSize: 22)),
+                const SizedBox(width: 20),
+                Text('Right Emoji: ${_selectedEmoji ?? "Not selected"}',
+                    style: const TextStyle(fontSize: 22)),
               ],
             ),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              //call the findValidEmojiCombo function here
+              onPressed: _findValidEmojiCombo,
+              child: const Text(
+                'Generate',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            if (_imageUrl != null)
+              Image.network(
+                _imageUrl!,
+                height: 40,
+                width: 30,
+              ),
             const SizedBox(height: 20.0),
             Text(
               'Available Emojis for Combinations: ${_emojis.length}',
