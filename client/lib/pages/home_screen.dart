@@ -33,7 +33,7 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
 
   Future<void> _getPossibleEmojisForCombination() async {
     final url = Uri.parse(
-        'http://192.168.0.153:3000/api/getPossibleEmojisForCombination');
+        'http://192.168.29.247:3000/api/getPossibleEmojisForCombination');
     try {
       final response = await http.post(
         url,
@@ -70,7 +70,7 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
       final rightEmoji = _selectedEmoji!;
 
       final url =
-          Uri.parse('http://192.168.0.153:3000/api/findValidEmojiCombo');
+          Uri.parse('http://192.168.29.247:3000/api/findValidEmojiCombo');
       try {
         final response = await http.post(
           url,
@@ -133,7 +133,7 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
               ),
               const SizedBox(height: 20.0),
               ElevatedButton(
-                  onPressed: () {
+                onPressed: () {
                   _focusNode.unfocus();
                   // Call your function here if needed
                   _getPossibleEmojisForCombination();
@@ -154,7 +154,7 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
               const SizedBox(height: 20.0),
               ElevatedButton(
                 //call the findValidEmojiCombo function here
-                  onPressed: () {
+                onPressed: () {
                   _focusNode.unfocus();
                   // Call your function here if needed
                   _findValidEmojiCombo();
@@ -168,7 +168,7 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
               if (_imageUrl != null)
                 Image.network(
                   _imageUrl!,
-                  height: 200,
+                  height: 118,
                 ),
               const SizedBox(height: 20.0),
               Text(
