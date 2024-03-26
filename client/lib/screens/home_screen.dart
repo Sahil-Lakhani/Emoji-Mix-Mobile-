@@ -62,60 +62,65 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
         appBar: AppBar(
           title: const Text('Emoji Search'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _emojiController,
-                style: const TextStyle(fontSize: 22),
-                decoration: const InputDecoration(
-                  labelText: 'Enter Emoji',
+         body: Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _emojiController,
+                  style: const TextStyle(fontSize: 22),
+                  decoration: const InputDecoration(
+                    labelText: 'Enter Emoji',
+                  ),
+                  focusNode: _focusNode,
                 ),
-                focusNode: _focusNode,
-              ),
-              const SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: () {
-                  _focusNode.unfocus();
-                  _getPossibleEmojisForCombination();
-                },
-                child: const Text('Search', style: TextStyle(fontSize: 18)),
-              ),
-              const SizedBox(height: 20.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Left Emoji: ${_emojiController.text}',
-                      style: const TextStyle(fontSize: 22)),
-                  const SizedBox(width: 20),
-                  Text('Right Emoji: ${_selectedEmoji ?? " "}',
-                      style: const TextStyle(fontSize: 22)),
-                ],
-              ),
-              const SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: () {
-                  _focusNode.unfocus();
-                  _findValidEmojiCombo();
-                },
-                child: const Text('Generate', style: TextStyle(fontSize: 18)),
-              ),
-              const SizedBox(height: 20.0),
-              if (_imageUrl != null)
-                Image.network(
-                  _imageUrl!,
-                  height: 120,
+                const SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: () {
+                    _focusNode.unfocus();
+                    _getPossibleEmojisForCombination();
+                  },
+                  child: const Text('Search', style: TextStyle(fontSize: 18)),
                 ),
-              const SizedBox(height: 20.0),
-              Text(
-                'Available Emojis for Combinations: ${_emojis.length}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20.0),
-              Expanded(
-                child: GridView.builder(
+                const SizedBox(height: 20.0),
+                Container(
+                  alignment: Alignment.topCenter,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Left Emoji: ${_emojiController.text}',
+                          style: const TextStyle(fontSize: 22)),
+                      const SizedBox(width: 20),
+                      Text('Right Emoji: ${_selectedEmoji ?? " "}',
+                          style: const TextStyle(fontSize: 22)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: () {
+                    _focusNode.unfocus();
+                    _findValidEmojiCombo();
+                  },
+                  child: const Text('Generate', style: TextStyle(fontSize: 18)),
+                ),
+                const SizedBox(height: 20.0),
+                if (_imageUrl != null)
+                  Image.network(
+                    _imageUrl!,
+                    height: 120,
+                  ),
+                const SizedBox(height: 20.0),
+                Text(
+                  'Available Emojis for Combinations: ${_emojis.length}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20.0),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 6,
                     crossAxisSpacing: 5.0,
@@ -129,7 +134,6 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
                           setState(() {
                             _selectedEmoji = _emojis[index];
                           });
-                          // printSelectedEmoji(_emojis[index]);
                         },
                         child: Center(
                           child: Text(_emojis[index]),
@@ -138,8 +142,8 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
                     );
                   },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
