@@ -1,4 +1,4 @@
-import 'package:emoji_mix_client/pages/home_screen.dart';
+import 'package:emoji_mix_client/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 void main() {
   runApp(const MyApp());

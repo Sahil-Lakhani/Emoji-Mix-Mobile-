@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import '/services/emoji_service.dart';
 
 class EmojiSearchScreen extends StatefulWidget {
   const EmojiSearchScreen({super.key});
@@ -15,7 +14,6 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
   String? _imageUrl;
   String? _selectedEmoji;
 
-  // Define a FocusNode instance
   late FocusNode _focusNode;
 
   @override
@@ -26,92 +24,38 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
 
   @override
   void dispose() {
-    // Dispose the FocusNode when it's no longer needed
     _focusNode.dispose();
     super.dispose();
   }
 
   Future<void> _getPossibleEmojisForCombination() async {
-    final url = Uri.parse(
-        'http://192.168.29.247:3000/api/getPossibleEmojisForCombination');
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'emoji': _emojiController.text}),
-      );
-
-      if (response.statusCode == 200) {
-        print(response.statusCode);
-        setState(() {
-          _emojis =
-              List<String>.from(jsonDecode(response.body)['possibleEmojis']);
-        });
-        print(_emojis);
-      } else {
-        setState(() {
-          _emojis = [];
-        });
-        print('Failed to fetch possible emojis: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      print('Error: $e');
-      setState(() {
-        _emojis = [];
-      });
-    }
+    final emojis = await EmojiService.getPossibleEmojisForCombination(
+        _emojiController.text);
+    setState(() {
+      _emojis = emojis;
+    });
   }
 
   Future<void> _findValidEmojiCombo() async {
     if (_emojis.isNotEmpty &&
         _emojiController.text.isNotEmpty &&
         _selectedEmoji != null) {
-      final leftEmoji = _emojiController.text;
-      final rightEmoji = _selectedEmoji!;
-
-      final url =
-          Uri.parse('http://192.168.29.247:3000/api/findValidEmojiCombo');
-      try {
-        final response = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'leftEmoji': leftEmoji,
-            'rightEmoji': rightEmoji,
-          }),
-        );
-
-        if (response.statusCode == 200) {
-          print(response.statusCode);
-          print(response.body);
-          setState(() {
-            _imageUrl = jsonDecode(response.body);
-            print('Image URL: $_imageUrl');
-          });
-        } else {
-          setState(() {
-            _imageUrl = null;
-          });
-        }
-      } catch (e) {
-        print(e);
-      }
+      final imageUrl = await EmojiService.findValidEmojiCombo(
+          _emojiController.text, _selectedEmoji!);
+      setState(() {
+        _imageUrl = imageUrl;
+      });
     }
   }
 
-  void printSelectedEmoji(String emoji) {
-    var leftEmoji = _emojiController.text;
-    var rightEmoji = emoji;
-    print('leftEmoji: $leftEmoji');
-    print('rightEmoji: $rightEmoji');
-  }
+  // void printSelectedEmoji(String emoji) {
+  //   print('leftEmoji: ${_emojiController.text}, rightEmoji: $emoji');
+  // }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // Wrap the entire Scaffold body with GestureDetector
       onTap: () {
-        // Call unfocus() method of FocusNode to hide the keyboard
         _focusNode.unfocus();
       },
       child: Scaffold(
@@ -129,13 +73,12 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Enter Emoji',
                 ),
-                focusNode: _focusNode, // Assign the FocusNode to TextField
+                focusNode: _focusNode,
               ),
               const SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () {
                   _focusNode.unfocus();
-                  // Call your function here if needed
                   _getPossibleEmojisForCombination();
                 },
                 child: const Text('Search', style: TextStyle(fontSize: 18)),
@@ -153,22 +96,17 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
               ),
               const SizedBox(height: 20.0),
               ElevatedButton(
-                //call the findValidEmojiCombo function here
                 onPressed: () {
                   _focusNode.unfocus();
-                  // Call your function here if needed
                   _findValidEmojiCombo();
                 },
-                child: const Text(
-                  'Generate',
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: const Text('Generate', style: TextStyle(fontSize: 18)),
               ),
               const SizedBox(height: 20.0),
               if (_imageUrl != null)
                 Image.network(
                   _imageUrl!,
-                  height: 118,
+                  height: 120,
                 ),
               const SizedBox(height: 20.0),
               Text(
@@ -191,7 +129,7 @@ class _EmojiSearchScreenState extends State<EmojiSearchScreen> {
                           setState(() {
                             _selectedEmoji = _emojis[index];
                           });
-                          printSelectedEmoji(_emojis[index]);
+                          // printSelectedEmoji(_emojis[index]);
                         },
                         child: Center(
                           child: Text(_emojis[index]),
